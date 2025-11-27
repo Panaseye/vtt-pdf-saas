@@ -1,8 +1,8 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import {FormEvent, useEffect, useState} from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabaseClient';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 
@@ -11,14 +11,20 @@ export default function AuthPage() {
     const supabase = createSupabaseBrowserClient();
     
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const redirect = searchParams.get('redirect') || '/process';
+    const [redirect, setRedirect] = useState('/process');
     const [mode, setMode] = useState<'signin' | 'signup'>('signin');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+          if (typeof window === 'undefined') return;
+          const params = new URLSearchParams(window.location.search);
+          const r = params.get('redirect');
+          if (r) setRedirect(r);
+        }, []);
 
     async function handleSubmit(e: FormEvent) {
         e.preventDefault();
